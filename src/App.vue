@@ -1,10 +1,20 @@
 <template>
-  <div class="container">
-    <h2>Список задач</h2>
-    <my-modal v-model:show="show"> </my-modal>
-    <todo-form @addTodo="addTodo"></todo-form>
-    <todo-list :todos="todos" v-if="!isTodosLoading"></todo-list>
-    <my-loader v-else></my-loader>
+  <div class="container app">
+    <div class="menu">
+      <ul class="menu__list">
+        <li class="menu__item" :key="nextDates[day]" v-for="day in nextDates">
+          <a href="" class="menu__link">{{
+            day.toLocaleString("ru", this.options)
+          }}</a>
+        </li>
+      </ul>
+    </div>
+    <div class="todo">
+      <h2>Список задач</h2>
+      <todo-form @addTodo="addTodo"></todo-form>
+      <todo-list :todos="todos" v-if="!isTodosLoading"></todo-list>
+      <my-loader v-else></my-loader>
+    </div>
   </div>
 </template>
 <script>
@@ -23,11 +33,29 @@ export default {
       limit: 15,
       isTodosLoading: false,
       show: false,
+      currentDate: new Date(),
+      numberOfNextDays: 5,
+      nextDates: [],
+      options: {
+        month: "long",
+        day: "numeric",
+      },
     };
   },
   methods: {
     addTodo(todo) {
       this.todos.unshift(todo);
+    },
+    getNextDate(data) {
+      let tomorrow = new Date();
+      tomorrow.setDate(data.getDate() + 1);
+      return tomorrow;
+    },
+    getNextDates(date) {
+      for (let i = 0; i < this.numberOfNextDays; i++) {
+        this.nextDates.push(date);
+        date = this.getNextDate(date);
+      }
     },
     async fetchTodos() {
       try {
@@ -50,6 +78,7 @@ export default {
   },
   mounted() {
     this.fetchTodos();
+    this.getNextDates(this.currentDate);
   },
 };
 </script>
@@ -63,5 +92,9 @@ export default {
   max-width: calc(1440px + 2rem);
   padding-inline: 1rem;
   margin-inline: auto;
+}
+.app {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
 }
 </style>
