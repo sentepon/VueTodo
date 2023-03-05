@@ -1,19 +1,24 @@
 <template>
   <div class="container app">
-    <div class="menu">
-      <ul class="menu__list">
-        <li class="menu__item" :key="nextDates[day]" v-for="day in nextDates">
-          <a href="" class="menu__link">{{
-            day.toLocaleString("ru", this.options)
-          }}</a>
-        </li>
-      </ul>
-    </div>
+    <todo-menu
+      :dates="dates"
+      :options="options"
+      v-model="selectedDate"
+    ></todo-menu>
     <div class="todo">
       <h2>Список задач</h2>
-      <todo-form @addTodo="addTodo"></todo-form>
-      <todo-list :todos="todos" v-if="!isTodosLoading"></todo-list>
+      <strong>{{ selectedDate.toLocaleString("ru", options) }}</strong>
+      <todo-form
+        @addTodo="addTodo"
+        :currentDate="currentDate.toLocaleDateString()"
+      ></todo-form>
+      <todo-list
+        :todos="selectedTodos"
+        v-if="!isTodosLoading"
+        @changeCompleted="changeCompleted"
+      ></todo-list>
       <my-loader v-else></my-loader>
+      <my-button v-if="isCompletedTodo">Удалить выполненные задачи</my-button>
     </div>
   </div>
 </template>
@@ -21,29 +26,38 @@
 import axios from "axios";
 import TodoList from "./components/TodoList.vue";
 import TodoForm from "./components/TodoForm.vue";
+import TodoMenu from "./components/TodoMenu.vue";
 
 export default {
   components: {
     TodoList,
     TodoForm,
+    TodoMenu,
   },
   data() {
     return {
       todos: [],
-      limit: 15,
+      limit: 5,
       isTodosLoading: false,
       show: false,
       currentDate: new Date(),
       numberOfNextDays: 5,
-      nextDates: [],
+      dates: [],
+      selectedDate: {},
       options: {
         month: "long",
         day: "numeric",
+      },
+      options2: {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
       },
     };
   },
   methods: {
     addTodo(todo) {
+      todo.date = this.selectedDate;
       this.todos.unshift(todo);
     },
     getNextDate(data) {
@@ -51,11 +65,18 @@ export default {
       tomorrow.setDate(data.getDate() + 1);
       return tomorrow;
     },
-    getNextDates(date) {
+    getDates(date) {
       for (let i = 0; i < this.numberOfNextDays; i++) {
-        this.nextDates.push(date);
+        this.dates.push(date);
         date = this.getNextDate(date);
       }
+    },
+    changeCompleted(checked, todo) {
+      this.todos.forEach((orTodo) => {
+        if (todo.id === orTodo.id) {
+          orTodo.completed = checked;
+        }
+      });
     },
     async fetchTodos() {
       try {
@@ -69,6 +90,10 @@ export default {
           }
         );
         this.todos = res.data;
+        this.todos.forEach((todo) => {
+          todo.date = this.selectedDate;
+          todo.time = "12:30";
+        });
       } catch (e) {
         alert("Error");
       } finally {
@@ -78,7 +103,22 @@ export default {
   },
   mounted() {
     this.fetchTodos();
-    this.getNextDates(this.currentDate);
+    this.getDates(this.currentDate);
+    this.selectedDate = this.currentDate;
+  },
+  computed: {
+    selectedTodos() {
+      return this.todos.filter((todo) => todo.date === this.selectedDate);
+    },
+    isCompletedTodo() {
+      let result = false;
+      this.selectedTodos.forEach((todo) => {
+        if (todo.completed === true) {
+          result = true;
+        }
+      });
+      return result;
+    },
   },
 };
 </script>
