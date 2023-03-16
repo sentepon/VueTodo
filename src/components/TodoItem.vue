@@ -36,7 +36,6 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 80%;
   gap: 1rem;
 }
 .todo-list__label {

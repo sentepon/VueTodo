@@ -6,8 +6,7 @@
       v-model="selectedDate"
     ></todo-menu>
     <div class="todo">
-      <h2>Список задач</h2>
-      <strong>{{ selectedDate.toLocaleString("ru", options) }}</strong>
+      <h2>{{ selectedDate.toLocaleString("ru", options) }}</h2>
       <todo-form
         @addTodo="addTodo"
         :currentDate="currentDate.toLocaleDateString()"
@@ -18,7 +17,9 @@
         @changeCompleted="changeCompleted"
       ></todo-list>
       <my-loader v-else></my-loader>
-      <my-button v-if="isCompletedTodo">Удалить выполненные задачи</my-button>
+      <my-button v-if="isCompletedTodo" @click="deleteCompleted"
+        >Удалить выполненные задачи</my-button
+      >
     </div>
   </div>
 </template>
@@ -48,11 +49,6 @@ export default {
         month: "long",
         day: "numeric",
       },
-      options2: {
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-      },
     };
   },
   methods: {
@@ -77,6 +73,9 @@ export default {
           orTodo.completed = checked;
         }
       });
+    },
+    deleteCompleted() {
+      this.todos = this.todos.filter((todo) => todo.completed === false);
     },
     async fetchTodos() {
       try {
@@ -129,7 +128,7 @@ export default {
   box-sizing: border-box;
 }
 .container {
-  max-width: calc(1440px + 2rem);
+  max-width: calc(1280px + 2rem);
   padding-inline: 1rem;
   margin-inline: auto;
 }

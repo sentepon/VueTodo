@@ -8,7 +8,6 @@
         v-model="todo.title"
       />
       <my-input type="time" class="form__time" v-model="todo.time" />
-      <my-input type="date" min="2022-03-02" />
       <my-button class="form__btn" @click="addTodo">Добавить задачу</my-button>
     </label>
   </form>
@@ -21,9 +20,9 @@ export default {
   data() {
     return {
       todo: {
+        id: "",
         title: "",
         time: "",
-        id: "",
         completed: "",
       },
     };
@@ -34,9 +33,9 @@ export default {
       this.todo.completed = false;
       this.$emit("addTodo", this.todo);
       this.todo = {
+        id: "",
         title: "",
         time: "",
-        id: "",
         completed: "",
       };
     },

@@ -1,5 +1,6 @@
 <template>
   <div class="menu">
+    <h1>ToDo</h1>
     <ul class="menu__list">
       <li
         class="menu__item"
